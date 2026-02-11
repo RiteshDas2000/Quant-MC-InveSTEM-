@@ -31,4 +31,4 @@ source venv/bin/activate  # Linux / macOS
 venv\Scripts\activate     # Windows
 
 # Install dependencies
-pip install numpy pandas matplotlib yfinance scipy arch numba
+pip3 install numpy pandas matplotlib yfinance scipy arch numba
