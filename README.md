@@ -48,4 +48,43 @@ CONFIG = {
 }
 ```
 
+# Monte Carlo Portfolio Plot Elements Description
+
+1. **Monte Carlo Paths (Blue, faint lines)**
+   - Each thin blue line represents one simulated portfolio path over the trading period.
+   - Generated using GARCH-based volatility and correlated asset returns.
+   - Shows the range of possible portfolio outcomes under the stochastic model.
+
+2. **Simulated Mean (Green line)**
+   - Represents the average value of all Monte Carlo paths at each trading day.
+   - Acts as a proxy for the expected portfolio trajectory.
+
+3. **5–95% Value-at-Risk (VaR) Band (Gold shaded area)**
+   - Covers the 5th to 95th percentile of simulated paths.
+   - Represents the central 90% range of possible outcomes, showing portfolio uncertainty.
+   - Helps visualize the likely range of portfolio values.
+
+4. **5% and 95% VaR Lines (Gold dashed lines)**
+   - Lower dashed line: 5% quantile, representing downside extreme scenarios.
+   - Upper dashed line: 95% quantile, representing the upside extreme.
+
+5. **Actual Portfolio Prices (Red line)**
+   - Shows the real historical portfolio values, calculated from actual market data.
+   - Useful for comparing model predictions with actual performance.
+
+6. **Terminal Return Distribution (Histogram in Growth Distribution Plot)**
+   - Displays the distribution of final portfolio returns across all Monte Carlo paths.
+   - Helps assess probabilities of gains, losses, and extreme outcomes.
+
+7. **Mean Terminal Return (Vertical Green Line in Histogram)**
+   - Marks the average final return across all simulations.
+   - Serves as the expected final outcome.
+
+8. **5% VaR and 5% CVaR (Vertical Purple Lines in Histogram)**
+   - 5% VaR: worst 5% outcomes.
+   - 5% CVaR: average of the worst 5% outcomes, highlighting extreme downside risk.
+
+9. **Probability of Loss (Calculated Metric)**
+   - Percentage of paths ending below the initial portfolio value.
+   - Not plotted directly, but key for risk assessment.
 
