@@ -20,7 +20,10 @@ It allows modeling fat-tailed shocks, correlated residuals, and visualizing port
 
 ## Installation
 
-Download and run .py file.
+Download and run inveSTEM Multi asset MC portfolio simulator.py.
+
+## OR
+
 
 ```bash
 # Clone the repository
