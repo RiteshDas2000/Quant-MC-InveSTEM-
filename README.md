@@ -92,3 +92,6 @@ CONFIG = {
 
 "inveSTEM Test case 50% ^GSPC 50% ^DJI.ipnyb" shows a test case from 2025-02-05 to 2026-02-05 for a portfolio comprised of 50% ^GSPC and 50% ^DJI.
 
+## Known issues
+
+Slight mismatch between the total number of actual and simulated days as the simulation does not take weekday holidays into account; similar minor issues may arise on mixing European and American markets.
