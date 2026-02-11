@@ -26,7 +26,7 @@ pip3 install numpy pandas matplotlib yfinance scipy arch numba
 ```
 ## Installation
 
-Download and run inveSTEM Multi asset MC portfolio simulator.py.
+Download and run "inveSTEM Multi asset MC portfolio simulator.py".
 
 
 ## Configuration
@@ -37,8 +37,8 @@ Define your simulation parameters:
 CONFIG = {
     "tickers": ["^GSPC", "^DJI"],      # Portfolio asset tickers
     "weights": [0.5, 0.5],             # Portfolio weights
-    "start_date": "2025-02-05",        # Simulation start date
-    "end_date": "2026-02-05",          # Simulation end date
+    "start_date": "2025-02-05",        # Simulation start date (yyyy/mm/dd)
+    "end_date": "2026-02-05",          # Simulation end date   (yyyy/mm/dd)
     "paths": 1000,                      # Number of Monte Carlo paths
     "df_tails": 15,                     # Student-t degrees of freedom
     "vol_window": 30,                   # Rolling window for initial volatility
@@ -48,7 +48,7 @@ CONFIG = {
 }
 ```
 
-# Monte Carlo Portfolio Plot Elements and Results Description
+## Monte Carlo Portfolio Plot Elements and Results Description
 
 1. **Monte Carlo Paths (Blue, faint lines)**
    - Each thin blue line represents one simulated portfolio path over the trading period.
@@ -87,4 +87,8 @@ CONFIG = {
 9. **Probability of Loss (Calculated Metric)**
    - Percentage of paths ending below the initial portfolio value.
    - Not plotted directly, but key for risk assessment.
+  
+## Test case
+
+"inveSTEM Test case 50% ^GSPC 50% ^DJI.ipnyb" shows a test case from 2025-02-05 to 2026-02-05 for a portfolio comprised of 50% ^GSPC and 50% ^DJI.
 
