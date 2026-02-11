@@ -24,6 +24,7 @@ Download and run inveSTEM Multi asset MC portfolio simulator.py.
 
 
 ## Install dependencies
+Install via pip by running the following line in terminal
 ```bash
 pip3 install numpy pandas matplotlib yfinance scipy arch numba
 ```
