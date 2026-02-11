@@ -37,3 +37,26 @@ venv\Scripts\activate     # Windows
 
 # Install dependencies
 pip3 install numpy pandas matplotlib yfinance scipy arch numba
+
+
+
+# Configuration
+
+Define your simulation parameters:
+
+```python
+CONFIG = {
+    "tickers": ["^GSPC", "^DJI"],      # Portfolio assets
+    "weights": [0.5, 0.5],             # Portfolio weights
+    "start_date": "2025-02-05",        # Simulation start date
+    "end_date": "2026-02-05",          # Simulation end date
+    "paths": 1000,                      # Number of Monte Carlo paths
+    "df_tails": 15,                     # Student-t degrees of freedom
+    "vol_window": 30,                   # Rolling window for initial volatility
+    "max_daily_return": None,           # Optional cap on daily returns
+    "return_type": "simple",            # "log" or "simple"
+    "db_file": "stocks.db"              # SQLite database
+}
+
+
+
