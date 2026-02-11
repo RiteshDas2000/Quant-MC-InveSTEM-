@@ -24,8 +24,6 @@ Download and run inveSTEM Multi asset MC portfolio simulator.py.
 
 ## OR
 
-
-```bash
 # Clone the repository
 git clone <repository-url>
 cd multi-asset-monte-carlo
