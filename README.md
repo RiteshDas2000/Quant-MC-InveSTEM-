@@ -20,6 +20,8 @@ It allows modeling fat-tailed shocks, correlated residuals, and visualizing port
 
 ## Installation
 
+Download and run .py file.
+
 ```bash
 # Clone the repository
 git clone <repository-url>
