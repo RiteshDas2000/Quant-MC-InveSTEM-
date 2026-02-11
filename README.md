@@ -22,29 +22,19 @@ It allows modeling fat-tailed shocks, correlated residuals, and visualizing port
 
 Download and run inveSTEM Multi asset MC portfolio simulator.py.
 
-## OR
 
-# Clone the repository
-git clone <repository-url>
-cd multi-asset-monte-carlo
-
-# Create a virtual environment (optional)
-python -m venv venv
-source venv/bin/activate  # Linux / macOS
-venv\Scripts\activate     # Windows
-
-# Install dependencies
+## Install dependencies
 pip3 install numpy pandas matplotlib yfinance scipy arch numba
 
 
 
-# Configuration
+## Configuration
 
 Define your simulation parameters:
 
 ```python
 CONFIG = {
-    "tickers": ["^GSPC", "^DJI"],      # Portfolio assets
+    "tickers": ["^GSPC", "^DJI"],      # Portfolio asset tickers
     "weights": [0.5, 0.5],             # Portfolio weights
     "start_date": "2025-02-05",        # Simulation start date
     "end_date": "2026-02-05",          # Simulation end date
