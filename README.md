@@ -18,16 +18,15 @@ It allows modeling fat-tailed shocks, correlated residuals, and visualizing port
 
 ---
 
-## Installation
-
-Download and run inveSTEM Multi asset MC portfolio simulator.py.
-
 
 ## Install dependencies
 Install via pip by running the following line in terminal
 ```bash
 pip3 install numpy pandas matplotlib yfinance scipy arch numba
 ```
+## Installation
+
+Download and run inveSTEM Multi asset MC portfolio simulator.py.
 
 
 ## Configuration
