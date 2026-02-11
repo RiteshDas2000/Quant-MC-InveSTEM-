@@ -24,8 +24,9 @@ Download and run inveSTEM Multi asset MC portfolio simulator.py.
 
 
 ## Install dependencies
+```bash
 pip3 install numpy pandas matplotlib yfinance scipy arch numba
-
+```
 
 
 ## Configuration
@@ -45,6 +46,6 @@ CONFIG = {
     "return_type": "simple",            # "log" or "simple"
     "db_file": "stocks.db"              # SQLite database
 }
-
+```
 
 
