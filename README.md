@@ -48,7 +48,7 @@ CONFIG = {
 }
 ```
 
-# Monte Carlo Portfolio Plot Elements Description
+# Monte Carlo Portfolio Plot Elements and Results Description
 
 1. **Monte Carlo Paths (Blue, faint lines)**
    - Each thin blue line represents one simulated portfolio path over the trading period.
@@ -57,7 +57,7 @@ CONFIG = {
 
 2. **Simulated Mean (Green line)**
    - Represents the average value of all Monte Carlo paths at each trading day.
-   - Acts as a proxy for the expected portfolio trajectory.
+   - Expected portfolio trajectory.
 
 3. **5–95% Value-at-Risk (VaR) Band (Gold shaded area)**
    - Covers the 5th to 95th percentile of simulated paths.
