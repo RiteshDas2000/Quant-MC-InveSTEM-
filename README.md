@@ -95,3 +95,9 @@ CONFIG = {
 ## Known issues
 
 Slight mismatch between the total number of actual and simulated days as the simulation does not take weekday holidays into account; similar minor issues may arise on mixing European and American markets.
+
+## Known issues
+**Authors**
+Ritesh Das (Conceptualization, Development, Publication, Application)
+Yaozu Tang (Application, Testing)
+Shubham Kumar (Validation, Testing)
