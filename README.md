@@ -98,6 +98,6 @@ Slight mismatch between the total number of actual and simulated days as the sim
 
 ## Known issues
 **Authors**
-Ritesh Das (Conceptualization, Development, Publication, Application)
-Yaozu Tang (Application, Testing)
-Shubham Kumar (Validation, Testing)
+Ritesh Das (Conceptualization, Development, Publication, Application).
+Yaozu Tang (Application, Testing).
+Shubham Kumar (Validation, Testing).
