@@ -96,6 +96,8 @@ CONFIG = {
 
 Slight mismatch between the total number of actual and simulated days as the simulation does not take weekday holidays into account; similar minor issues may arise on mixing European and American markets.
 
+Current comments are added using generative AI and are meant to serve as a reference only. The comments have been checked rigorously by the authors.
+
 ## Authors
 
 **Ritesh Das**  
