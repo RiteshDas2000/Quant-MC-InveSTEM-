@@ -5,7 +5,7 @@ It allows modeling fat-tailed shocks, correlated residuals, and visualizing port
 
 The project ships in two forms:
 
-1. **The original script** — `simulation.py`, runnable standalone via the CLI.
+1. **The original script** — `simulation.py`, runnable standalone using IDLE. Also available as Jupyter notebook.
 2. **The web frontend** — a Flask-based browser UI that wraps the original script unchanged, so non-technical users can pick tickers, tweak parameters, and view results without touching code.
 
 ---
@@ -24,7 +24,7 @@ The project ships in two forms:
 
 ---
 
-## Main folder structure
+## Main zip file structure
 
 ```
 investem/
