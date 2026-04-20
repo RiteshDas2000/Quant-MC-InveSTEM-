@@ -24,7 +24,7 @@ The project ships in two forms:
 
 ---
 
-## Repository structure
+## Main folder structure
 
 ```
 investem/
