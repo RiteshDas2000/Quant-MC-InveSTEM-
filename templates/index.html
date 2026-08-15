@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>inve-STEM · Portfolio Simulation</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=JetBrains+Mono:wght@300;400;500;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<!-- Grain overlay -->
+<div class="grain"></div>
+
+<!-- Top bar -->
+<header class="topbar">
+  <div class="brand">
+    <span class="logo-mark">◈</span>
+    <div class="brand-text">
+      <div class="brand-title">INVE·STEM</div>
+      <div class="brand-sub">Portfolio Risk Terminal</div>
+    </div>
+  </div>
+
+  <div class="topbar-meta">
+    <div class="meta-item">
+      <span class="meta-label">ENGINE</span>
+      <span class="meta-value">GARCH(1,1) · Student-t</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">SESSION</span>
+      <span class="meta-value" id="session-time">—</span>
+    </div>
+    <div class="meta-item status">
+      <span class="pulse"></span>
+      <span class="meta-value">ONLINE</span>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ===== LEFT: CONFIGURATION ===== -->
+  <section class="panel config">
+    <div class="panel-header">
+      <div class="panel-index">01</div>
+      <h2 class="panel-title">Configure<br/><em>simulation</em></h2>
+    </div>
+
+    <form id="sim-form" class="form" onsubmit="return false;">
+
+      <!-- Tickers & weights -->
+      <div class="field-group">
+        <label class="field-label">
+          <span>Portfolio Assets</span>
+          <span class="hint">ticker · weight</span>
+        </label>
+
+        <div id="assets" class="assets"></div>
+
+        <div class="asset-controls">
+          <button type="button" class="btn-ghost" id="add-asset">＋ add asset</button>
+          <button type="button" class="btn-ghost" id="normalize">⚖ normalize weights</button>
+        </div>
+
+        <div class="quick-picks">
+          <span class="quick-label">quick picks:</span>
+          <button type="button" class="chip" data-preset="sp-dow">S&amp;P + Dow</button>
+          <button type="button" class="chip" data-preset="tech">Big Tech</button>
+          <button type="button" class="chip" data-preset="defensive">Defensive</button>
+          <button type="button" class="chip" data-preset="global">Global Mix</button>
+        </div>
+      </div>
+
+      <!-- Dates -->
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label"><span>Start Date</span></label>
+          <input type="date" id="start_date" value="2025-02-05" required>
+        </div>
+        <div class="field">
+          <label class="field-label"><span>End Date</span></label>
+          <input type="date" id="end_date" value="2026-02-05" required>
+        </div>
+      </div>
+
+      <!-- Paths slider -->
+      <div class="field">
+        <label class="field-label">
+          <span>Monte Carlo Paths</span>
+          <span class="hint" id="paths-readout">1,000</span>
+        </label>
+        <input type="range" id="paths" min="100" max="5000" step="100" value="1000">
+        <div class="slider-ticks">
+          <span>100</span><span>1k</span><span>2.5k</span><span>5k</span>
+        </div>
+      </div>
+
+      <!-- Advanced -->
+      <details class="advanced">
+        <summary>
+          <span>Advanced parameters</span>
+          <span class="chevron">›</span>
+        </summary>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label"><span>Tail Heaviness (df)</span></label>
+            <input type="number" id="df_tails" value="15" min="3" max="100">
+          </div>
+          <div class="field">
+            <label class="field-label"><span>Vol Window</span></label>
+            <input type="number" id="vol_window" value="30" min="5" max="252">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label"><span>Return Type</span></label>
+            <select id="return_type">
+              <option value="simple" selected>Simple</option>
+              <option value="log">Log</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label"><span>Max Daily Return</span></label>
+            <input type="text" id="max_daily_return" placeholder="e.g. 0.2 (blank = off)">
+          </div>
+        </div>
+      </details>
+
+      <!-- Run button -->
+      <button type="button" class="btn-run" id="run-btn">
+        <span class="btn-run-label">Execute Simulation</span>
+        <span class="btn-run-arrow">→</span>
+      </button>
+
+      <p class="disclaimer">
+        Simulations are generated from historical residuals and are for
+        educational use only. Not investment advice.
+      </p>
+
+    </form>
+  </section>
+
+  <!-- ===== RIGHT: OUTPUT ===== -->
+  <section class="panel output">
+    <div class="panel-header">
+      <div class="panel-index">02</div>
+      <h2 class="panel-title">Results<br/><em>&amp; risk profile</em></h2>
+    </div>
+
+    <!-- Idle state -->
+    <div class="state-idle" id="state-idle">
+      <div class="idle-tag">How to use</div>
+      <ol class="idle-steps">
+        <li><span class="step-num">01</span><span>Add tickers and their weights in the Portfolio Assets list, or click a quick-pick preset.</span></li>
+        <li><span class="step-num">02</span><span>Set the start and end dates for the simulation window.</span></li>
+        <li><span class="step-num">03</span><span>Choose how many Monte Carlo paths to run. More paths = smoother distribution, slower run.</span></li>
+        <li><span class="step-num">04</span><span>Optionally open Advanced parameters to adjust the GARCH settings.</span></li>
+        <li><span class="step-num">05</span><span>Click <em>Execute Simulation</em>. Results will appear here.</span></li>
+      </ol>
+    </div>
+
+    <!-- Error -->
+    <div class="state-error" id="state-error" hidden>
+      <div class="error-mark">!</div>
+      <h3>Simulation failed</h3>
+      <pre id="error-text"></pre>
+    </div>
+
+    <!-- Results -->
+    <div class="state-results" id="state-results" hidden>
+
+      <!-- Metric strip -->
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Mean Return</div>
+          <div class="metric-value" id="m-mean">—</div>
+          <div class="metric-sub">across all paths</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">VaR 95%</div>
+          <div class="metric-value danger" id="m-var">—</div>
+          <div class="metric-sub">5th percentile</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">CVaR 95%</div>
+          <div class="metric-value danger" id="m-cvar">—</div>
+          <div class="metric-sub">expected tail loss</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">P(Loss)</div>
+          <div class="metric-value" id="m-loss">—</div>
+          <div class="metric-sub">chance of net loss</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Best / Worst</div>
+          <div class="metric-value small" id="m-bw">—</div>
+          <div class="metric-sub">terminal extremes</div>
+        </div>
+        <div class="metric highlight" id="m-actual-wrap" hidden>
+          <div class="metric-label">Actual Return</div>
+          <div class="metric-value" id="m-actual">—</div>
+          <div class="metric-sub">observed</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts">
+        <figure class="chart">
+          <figcaption>
+            <span class="chart-index">FIG·A</span>
+            <span class="chart-title">Simulated price paths vs. actual</span>
+          </figcaption>
+          <img id="chart-paths" alt="Monte Carlo portfolio paths">
+        </figure>
+
+        <figure class="chart">
+          <figcaption>
+            <span class="chart-index">FIG·B</span>
+            <span class="chart-title">Terminal return distribution</span>
+          </figcaption>
+          <img id="chart-dist" alt="Portfolio growth distribution">
+        </figure>
+      </div>
+
+      <div class="run-stamp">
+        <span id="run-summary">—</span>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<footer class="footer">
+  <span>inve-STEM</span>
+  <span class="sep">·</span>
+  <span>GARCH volatility model</span>
+  <span class="sep">·</span>
+  <span>Powered by your simulation script</span>
+</footer>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
