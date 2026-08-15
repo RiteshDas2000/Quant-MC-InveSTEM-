@@ -27,7 +27,7 @@ The project ships in two forms:
 ## Main zip file structure
 
 ```
-investem/
+Quant-MC-InveSTEM--main/
 ├── simulation.py       # Core simulation engine (original, unmodified)
 ├── app.py              # Flask server — imports simulation.py and serves the web UI
 ├── requirements.txt    # Python dependencies
