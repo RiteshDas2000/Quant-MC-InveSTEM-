@@ -12,6 +12,7 @@ from scipy.stats import t  # Student-t distribution (fat-tailed shocks)
 from arch import arch_model  # GARCH volatility modeling
 from numba import njit  # JIT compiler for performance optimization
 
+
 # ============================================================
 # ------------------- CONFIG / PARAMETERS --------------------
 # ============================================================
