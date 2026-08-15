@@ -4,5 +4,5 @@ pandas
 matplotlib
 yfinance
 scipy
-arch
 numba
+arch
