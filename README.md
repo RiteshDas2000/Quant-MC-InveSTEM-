@@ -3,6 +3,10 @@
 A Python-based framework to simulate multi-asset portfolio price paths using **Monte Carlo simulations with GARCH(1,1) volatility and Student-t shocks**.
 It allows modeling fat-tailed shocks, correlated residuals, and visualizing portfolio risk metrics versus actual historical performance.
 
+![Monte Carlo paths vs actual portfolio](docs/images/mc_paths.png)
+
+*Test case: 50% S&P 500 (^GSPC) and 50% Dow Jones (^DJI), 5 Feb 2025 to 5 Feb 2026, 1,000 paths. The red line is what the portfolio actually did.*
+
 The project ships in two forms:
 
 1. **The original script** — `simulation.py`, runnable standalone using IDLE. Also available as Jupyter notebook.
@@ -107,6 +111,8 @@ python3 app.py
 
 Then open **http://127.0.0.1:5000** in your browser.
 
+<p align="center"><img src="docs/images/web_ui.png" width="340" alt="Web UI configuration panel"></p>
+
 ### How to use the UI
 
 1. **Add tickers and weights** in the Portfolio Assets list, or click a quick-pick preset (S&P + Dow, Big Tech, Defensive, Global Mix).
@@ -124,6 +130,10 @@ If you edit `simulation.py`, restart `app.py` to pick up the changes. The first 
 ---
 
 ## Monte Carlo Portfolio Plot Elements and Results Description
+
+![Terminal return distribution](docs/images/return_distribution.png)
+
+*Same test case. Simulated mean return 11.68% against an actual return of 12.16%, with a 5% VaR of -22.09% and a 33.5% chance of ending at a loss.*
 
 1. **Monte Carlo Paths (Blue, faint lines)**
    - Each thin blue line represents one simulated portfolio path over the trading period.
