@@ -1,11 +1,20 @@
-# inve-STEM — Multi-Asset Monte Carlo Portfolio Simulation
+# inveSTEM: Monte Carlo portfolio risk model
 
-A Python-based framework to simulate multi-asset portfolio price paths using **Monte Carlo simulations with GARCH(1,1) volatility and Student-t shocks**.
-It allows modeling fat-tailed shocks, correlated residuals, and visualizing portfolio risk metrics versus actual historical performance.
+Simulates a multi-asset portfolio with **GARCH(1,1) volatility, Student-t shocks and correlated assets**, and estimates **VaR, CVaR and the chance of a loss**.
+
+## How it works
+
+The model only learns from prices **before** the simulation start date. From that history it fits:
+
+- the GARCH(1,1) volatility model and the mean daily return of each asset
+- the starting volatility
+- the correlations between assets
+
+It then simulates the portfolio from the start date to the end date, and plots what the real portfolio did over that same period (red line) on top. **None of the prices inside the simulation window are used for fitting**, so the plot shows directly how well the forecast held up on unseen data.
 
 ![Monte Carlo paths vs actual portfolio](docs/images/mc_paths.png)
 
-*Test case: 50% S&P 500 (^GSPC) and 50% Dow Jones (^DJI), 5 Feb 2025 to 5 Feb 2026, 1,000 paths. The red line is what the portfolio actually did.*
+*Test case: 50% S&P 500 (^GSPC) and 50% Dow Jones (^DJI), 1,000 paths. Fitted on daily prices from January 2021 to 4 February 2025, then simulated from 5 February 2025 to 5 February 2026. The real portfolio returned 12.2% against a simulated mean of 11.7%. It stayed inside the 5–95% band for almost the whole year, dipping just below the 5% line only briefly around trading day 45–50.*
 
 The project ships in two forms:
 
@@ -177,13 +186,13 @@ If you edit `simulation.py`, restart `app.py` to pick up the changes. The first 
 
 ## Test case
 
-`inveSTEM Test case 50% ^GSPC 50% ^DJI.ipynb` shows a test case from 2025-02-05 to 2026-02-05 for a portfolio comprised of 50% ^GSPC and 50% ^DJI.
+`inveSTEM Test case 50% ^GSPC 50% ^DJI.ipynb` reproduces the test above: fitted on data up to 4 February 2025, simulated and compared with the real portfolio from 5 February 2025 to 5 February 2026.
 
 ---
 
-## Known issues
+## Limitations
 
-Slight mismatch between the total number of actual and simulated days as the simulation does not take weekday holidays into account; similar minor issues may arise on mixing European and American markets.
+The simulation uses business days, so market holidays can make the simulated and actual series differ by a few days in length. Mixing markets with different holiday calendars (for example European and American) can add similar small offsets.
 
 ---
 
