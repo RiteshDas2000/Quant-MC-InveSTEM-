@@ -46,7 +46,7 @@ function setAssets(pairs) {
   pairs.forEach(([t, w]) => assetsEl.appendChild(makeAssetRow(t, w)));
 }
 
-// Default pair: S&P + Dow (matches the user's default CONFIG)
+// Default pair: S&P + Dow (same as the default CONFIG in simulation.py)
 setAssets([["^GSPC", 0.5], ["^DJI", 0.5]]);
 
 document.getElementById("add-asset").addEventListener("click", () => {

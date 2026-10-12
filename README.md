@@ -18,8 +18,8 @@ It then simulates the portfolio from the start date to the end date, and plots w
 
 The project ships in two forms:
 
-1. **The original script** — `simulation.py`, runnable standalone using IDLE. Also available as Jupyter notebook.
-2. **The web frontend** — a Flask-based browser UI that wraps the original script unchanged, so non-technical users can pick tickers, tweak parameters, and view results without touching code.
+1. **The script** — `simulation.py`, runnable standalone using IDLE. Also available as Jupyter notebook.
+2. **The web frontend** — a Flask-based browser UI built on `simulation.py`, so non-technical users can pick tickers, tweak parameters, and view results without touching code.
 
 ---
 
@@ -41,9 +41,11 @@ The project ships in two forms:
 
 ```
 Quant-MC-InveSTEM--main/
-├── simulation.py       # Core simulation engine (original, unmodified)
+├── simulation.py       # Core simulation engine
 ├── app.py              # Flask server — imports simulation.py and serves the web UI
 ├── requirements.txt    # Python dependencies
+├── Dockerfile          # Container image for the web frontend
+├── docker-compose.yml  # One-command start: docker compose up
 ├── templates/
 │   └── index.html      # Web UI markup
 └── static/
@@ -132,9 +134,23 @@ Then open **http://127.0.0.1:5000** in your browser.
 
 ### How it works
 
-`app.py` imports `simulation.py` as a module and calls its `download_and_store(...)` and `PortfolioSimulator(...).simulate()` functions directly. The simulation code itself is untouched; the Flask layer only handles the form input, dispatches the simulation call, and renders the matplotlib output as PNGs in the browser.
+`app.py` imports `simulation.py` as a module and calls its `download_and_store(...)` and `PortfolioSimulator(...).simulate()` functions directly. The Flask layer only handles the form input, dispatches the simulation call, and renders the matplotlib output as PNGs in the browser.
 
 If you edit `simulation.py`, restart `app.py` to pick up the changes. The first run takes a little longer because `numba` JIT-compiles the GARCH loop.
+
+---
+
+## Option C — Run with Docker
+
+With [Docker](https://www.docker.com/products/docker-desktop/) installed, you do not need to install Python or any packages. From the project directory, run:
+
+```bash
+docker compose up
+```
+
+Then open **http://localhost:8000** in your browser. The first build takes a few minutes. Inside the container the app is served by `gunicorn` instead of the Flask development server, with a long request timeout because a simulation can take a while.
+
+Port 8000 is used on your computer because port 5000 is often taken by AirPlay Receiver on macOS. Stop the app with `Ctrl+C`, or `docker compose down`.
 
 ---
 

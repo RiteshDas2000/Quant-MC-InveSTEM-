@@ -1,8 +1,8 @@
 """
 Flask frontend for inve-STEM — portfolio simulation UI.
 
-This wraps the user's existing simulation.py (their original script, unmodified)
-and exposes it through a web UI.
+Runs the Monte Carlo simulation in simulation.py from a web page, so the
+portfolio and parameters can be set without editing the code.
 
 
 Run with:
@@ -23,9 +23,7 @@ import matplotlib.pyplot as plt
 
 from flask import Flask, render_template, request, jsonify
 
-# Import the user's unmodified script.
-# We import the pieces we need; their script must be named simulation.py
-# and sit in the same directory as this file.
+# simulation.py must be in the same directory as this file.
 import simulation as sim
 
 
@@ -48,8 +46,8 @@ def fig_to_base64(fig):
 
 
 def make_portfolio_figure(portfolio_prices, actual_prices, tickers, weights):
-    """Recreates the user's plot_portfolio chart but returns the figure
-    instead of calling plt.show(), so we can send it to the browser."""
+    """Same chart as plot_portfolio in simulation.py, but returns the figure
+    instead of calling plt.show(), so it can be sent to the browser."""
     from matplotlib.lines import Line2D
 
     VaR_lower = np.percentile(portfolio_prices, 5, axis=1)
@@ -90,7 +88,7 @@ def make_portfolio_figure(portfolio_prices, actual_prices, tickers, weights):
 
 
 def make_distribution_figure(portfolio_prices, actual_prices, tickers, weights):
-    """Recreates the user's plot_growth_distribution chart as a figure."""
+    """Same chart as plot_growth_distribution in simulation.py, returned as a figure."""
     final_prices = portfolio_prices[-1]
     final_returns = (final_prices / portfolio_prices[0, 0] - 1) * 100
 
@@ -156,7 +154,7 @@ def simulate():
         if len(tickers) == 0:
             return jsonify({"error": "Add at least one ticker."}), 400
         if abs(weights.sum() - 1.0) > 1e-6:
-            # Auto-normalize rather than failing
+            # Normalise weights so they sum to 1
             weights = weights / weights.sum()
 
         start_date = data["start_date"]
@@ -176,7 +174,7 @@ def simulate():
         # 1) Download price history into the local SQLite DB
         sim.download_and_store(tickers, db_file, end_date)
 
-        # 2) Run the simulation using the user's PortfolioSimulator
+        # 2) Run the simulation
         portfolio_sim = sim.PortfolioSimulator(
             tickers=tickers,
             weights=weights,
