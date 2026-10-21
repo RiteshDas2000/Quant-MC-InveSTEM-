@@ -19,7 +19,7 @@ It then simulates the portfolio from the start date to the end date, and plots w
 The project ships in two forms:
 
 1. **The script** — `simulation.py`, runnable standalone using IDLE. Also available as Jupyter notebook.
-2. **The web frontend** — a Flask-based browser UI built on `simulation.py`, so non-technical users can pick tickers, tweak parameters, and view results without touching code.
+2. **The web dashboard** — a Flask-based browser UI built on `simulation.py`, so non-technical users can pick tickers, tweak parameters, and explore the results in interactive charts without touching code.
 
 ---
 
@@ -108,9 +108,9 @@ CONFIG = {
 
 ---
 
-## Option B — Run the web frontend
+## Option B — Run the web dashboard
 
-The web frontend gives anyone a point-and-click interface to the simulator — no Python editing required.
+The web dashboard gives anyone a point-and-click interface to the simulator — no Python editing required.
 
 ### Start the server
 
@@ -122,7 +122,11 @@ python3 app.py
 
 Then open **http://127.0.0.1:5000** in your browser.
 
-<p align="center"><img src="docs/images/web_ui.png" width="340" alt="Web UI configuration panel"></p>
+![InveSTEM dashboard](docs/images/dashboard_overview.png)
+
+*The dashboard after a run for 50% S&P 500 and 50% Dow Jones, 1,000 paths, simulated from 5 February 2025 to 5 February 2026.*
+
+<p align="center"><img src="docs/images/web_ui.png" width="340" alt="Configuration panel"></p>
 
 ### How to use the UI
 
@@ -134,11 +138,21 @@ Then open **http://127.0.0.1:5000** in your browser.
    - **Fig A** — sample paths, percentile bands, the median and mean, and the real portfolio.
    - **Fig B** — the return distribution on the chosen day, with VaR, the mean and the actual return marked.
    - **Fig C** — how VaR, CVaR and the chance of a loss develop over the horizon.
+
+   ![Fig A, simulated paths and percentile bands](docs/images/dashboard_paths.png)
+
+   <p align="center">
+     <img src="docs/images/dashboard_distribution.png" width="49%" alt="Fig B, return distribution at the chosen day">
+     <img src="docs/images/dashboard_risk.png" width="49%" alt="Fig C, risk over the horizon">
+   </p>
+
+   *Fig B here shows 25 April 2025, just after the April sell-off. The real portfolio was down 9.5%, right at the simulated 95% VaR of −9.2%, and it recovered to +9.9% by early January 2026.*
+
 6. Drag the **Horizon** slider (or click on Fig A) to see the risk on any day, and the **Confidence** slider to change the VaR level. These update instantly, without running the simulation again. Charts can be zoomed, hovered and saved as PNG from their toolbar.
 
 ### How it works
 
-`app.py` imports `simulation.py` as a module and calls its `download_and_store(...)` and `PortfolioSimulator(...).simulate()` functions directly. The Flask layer only handles the form input, dispatches the simulation call, and renders the matplotlib output as PNGs in the browser.
+`app.py` imports `simulation.py` as a module and calls its `download_and_store(...)` and `PortfolioSimulator(...).simulate()` functions directly. The Flask layer only handles the form input and the simulation call. After a run it condenses all paths into percentiles, daily histograms and a few sample paths, so the browser can redraw the charts for any day and confidence level without simulating again. The charts use Plotly, served from the installed `plotly` package, so no CDN is needed.
 
 If you edit `simulation.py`, restart `app.py` to pick up the changes. The first run takes a little longer because `numba` JIT-compiles the GARCH loop.
 
@@ -154,7 +168,7 @@ docker compose up
 
 Then open **http://localhost:8000** in your browser. The first build takes a few minutes. Inside the container the app is served by `gunicorn` instead of the Flask development server, with a long request timeout because a simulation can take a while.
 
-Port 8000 is used on your computer because port 5000 is often taken by AirPlay Receiver on macOS. Stop the app with `Ctrl+C`, or `docker compose down`.
+Port 8000 is used on your computer because port 5000 is often taken by AirPlay Receiver on macOS. Stop the app with `Ctrl+C`, or `docker compose down`. After pulling new code, rebuild the image with `docker compose up --build`.
 
 ---
 

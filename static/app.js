@@ -327,7 +327,7 @@ function drawRisk() {
   Plotly.react("chart-risk", [
     { x, y: q(tail), mode: "lines", name: `VaR ${view.conf}%`, line: { color: C.amber, width: 2 } },
     { x, y: cvarSeries(tail), mode: "lines", name: `CVaR ${view.conf}%`, line: { color: C.red, width: 2 } },
-    { x, y: R.p_loss, mode: "lines", name: "P(loss)", yaxis: "y2", line: { color: C.violet, width: 1.5, dash: "dot" } },
+    { x: x.slice(1), y: R.p_loss.slice(1), mode: "lines", name: "P(loss)", yaxis: "y2", line: { color: C.violet, width: 1.5, dash: "dot" } },
   ], layout, PLOT_CONFIG).then(() => moveMarker("chart-risk"));
 }
 
