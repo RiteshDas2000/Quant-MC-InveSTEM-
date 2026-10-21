@@ -163,7 +163,7 @@
         <li><span class="step-num">02</span><span>Set the start and end dates for the simulation window.</span></li>
         <li><span class="step-num">03</span><span>Choose how many Monte Carlo paths to run. More paths = smoother distribution, slower run.</span></li>
         <li><span class="step-num">04</span><span>Optionally open Advanced parameters to adjust the GARCH settings.</span></li>
-        <li><span class="step-num">05</span><span>Click <em>Execute Simulation</em>. Results will appear here.</span></li>
+        <li><span class="step-num">05</span><span>Click <em>Execute Simulation</em>. Then use the horizon and confidence sliders to explore the results without running it again.</span></li>
       </ol>
     </div>
 
@@ -177,37 +177,63 @@
     <!-- Results -->
     <div class="state-results" id="state-results" hidden>
 
+      <!-- Live controls -->
+      <div class="controls">
+        <div class="control">
+          <label class="field-label" for="horizon">
+            <span>Horizon</span>
+            <span class="hint" id="horizon-readout">—</span>
+          </label>
+          <input type="range" id="horizon" min="1" max="1" step="1" value="1">
+        </div>
+        <div class="control">
+          <label class="field-label" for="confidence">
+            <span>Confidence</span>
+            <span class="hint" id="confidence-readout">95%</span>
+          </label>
+          <input type="range" id="confidence" min="80" max="99.5" step="0.5" value="95">
+        </div>
+        <div class="control toggles">
+          <div class="segmented" role="group" aria-label="Units">
+            <button type="button" class="seg active" data-units="ret">Return %</button>
+            <button type="button" class="seg" data-units="val">Value</button>
+          </div>
+          <label class="check"><input type="checkbox" id="show-sample" checked> sample paths</label>
+          <label class="check"><input type="checkbox" id="show-actual" checked> actual</label>
+        </div>
+      </div>
+
       <!-- Metric strip -->
       <div class="metrics">
         <div class="metric">
-          <div class="metric-label">Mean Return</div>
+          <div class="metric-label">Expected Return</div>
           <div class="metric-value" id="m-mean">—</div>
-          <div class="metric-sub">across all paths</div>
+          <div class="metric-sub">mean of all paths</div>
         </div>
         <div class="metric">
-          <div class="metric-label">VaR 95%</div>
+          <div class="metric-label">Median</div>
+          <div class="metric-value" id="m-median">—</div>
+          <div class="metric-sub">50th percentile</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label" id="m-var-label">VaR 95%</div>
           <div class="metric-value danger" id="m-var">—</div>
-          <div class="metric-sub">5th percentile</div>
+          <div class="metric-sub" id="m-var-sub">5th percentile</div>
         </div>
         <div class="metric">
-          <div class="metric-label">CVaR 95%</div>
+          <div class="metric-label" id="m-cvar-label">CVaR 95%</div>
           <div class="metric-value danger" id="m-cvar">—</div>
-          <div class="metric-sub">expected tail loss</div>
+          <div class="metric-sub">average of the worst tail</div>
         </div>
         <div class="metric">
           <div class="metric-label">P(Loss)</div>
           <div class="metric-value" id="m-loss">—</div>
-          <div class="metric-sub">chance of net loss</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Best / Worst</div>
-          <div class="metric-value small" id="m-bw">—</div>
-          <div class="metric-sub">terminal extremes</div>
+          <div class="metric-sub">chance of being below start</div>
         </div>
         <div class="metric highlight" id="m-actual-wrap" hidden>
           <div class="metric-label">Actual Return</div>
           <div class="metric-value" id="m-actual">—</div>
-          <div class="metric-sub">observed</div>
+          <div class="metric-sub" id="m-actual-sub">observed</div>
         </div>
       </div>
 
@@ -216,18 +242,29 @@
         <figure class="chart">
           <figcaption>
             <span class="chart-index">FIG·A</span>
-            <span class="chart-title">Simulated price paths vs. actual</span>
+            <span class="chart-title">Simulated paths, percentile bands and actual</span>
+            <span class="chart-hint">click the chart to move the horizon</span>
           </figcaption>
-          <img id="chart-paths" alt="Monte Carlo portfolio paths">
+          <div id="chart-paths" class="plot plot-tall"></div>
         </figure>
 
-        <figure class="chart">
-          <figcaption>
-            <span class="chart-index">FIG·B</span>
-            <span class="chart-title">Terminal return distribution</span>
-          </figcaption>
-          <img id="chart-dist" alt="Portfolio growth distribution">
-        </figure>
+        <div class="chart-row">
+          <figure class="chart">
+            <figcaption>
+              <span class="chart-index">FIG·B</span>
+              <span class="chart-title" id="dist-title">Return distribution at horizon</span>
+            </figcaption>
+            <div id="chart-dist" class="plot"></div>
+          </figure>
+
+          <figure class="chart">
+            <figcaption>
+              <span class="chart-index">FIG·C</span>
+              <span class="chart-title">Risk over the horizon</span>
+            </figcaption>
+            <div id="chart-risk" class="plot"></div>
+          </figure>
+        </div>
       </div>
 
       <div class="run-stamp">
@@ -243,9 +280,10 @@
   <span class="sep">·</span>
   <span>GARCH volatility model</span>
   <span class="sep">·</span>
-  <span>Powered by your simulation script</span>
+  <span>Interactive charts by Plotly</span>
 </footer>
 
+<script src="{{ url_for('plotly_js') }}"></script>
 <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
