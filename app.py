@@ -1,9 +1,10 @@
 """
-Flask frontend for inve-STEM — portfolio simulation UI.
+Flask frontend for inve-STEM — portfolio simulation dashboard.
 
 Runs the Monte Carlo simulation in simulation.py from a web page, so the
-portfolio and parameters can be set without editing the code.
-
+portfolio and parameters can be set without editing the code. The charts
+are drawn in the browser with Plotly, so they can be zoomed, hovered and
+explored with the sliders without running the simulation again.
 
 Run with:
     python app.py
@@ -11,17 +12,13 @@ Run with:
 Then open http://127.0.0.1:5000 in your browser.
 """
 
-import io
-import base64
 import traceback
 from datetime import date
 
 import numpy as np
-import matplotlib
-matplotlib.use("Agg")  # Non-interactive backend for server-side rendering
-import matplotlib.pyplot as plt
-
-from flask import Flask, render_template, request, jsonify
+import pandas as pd
+from flask import Flask, Response, render_template, request, jsonify
+from plotly.offline import get_plotlyjs
 
 # simulation.py must be in the same directory as this file.
 import simulation as sim
@@ -29,117 +26,73 @@ import simulation as sim
 
 app = Flask(__name__)
 
-
-# ----------------------------------------------------------------------
-# Helpers
-# ----------------------------------------------------------------------
-
-def fig_to_base64(fig):
-    """Serialize a matplotlib figure to a base64-encoded PNG string."""
-    buf = io.BytesIO()
-    fig.savefig(buf, format="png", dpi=110, bbox_inches="tight",
-                facecolor=fig.get_facecolor())
-    buf.seek(0)
-    encoded = base64.b64encode(buf.read()).decode("ascii")
-    plt.close(fig)
-    return f"data:image/png;base64,{encoded}"
+# Percentile levels sent to the browser. With these the sliders can show any
+# confidence level and any day of the horizon without another server call.
+QUANTILE_LEVELS = np.round(np.arange(0.5, 100, 0.5), 1)
+HIST_BINS = 60
+SAMPLE_PATHS = 40
 
 
-def make_portfolio_figure(portfolio_prices, actual_prices, tickers, weights):
-    """Same chart as plot_portfolio in simulation.py, but returns the figure
-    instead of calling plt.show(), so it can be sent to the browser."""
-    from matplotlib.lines import Line2D
+def summarise(portfolio_prices, actual_prices, start_date):
+    """Turn the full (days x paths) price matrix into the compact set of
+    numbers the dashboard needs. Everything is computed on all paths."""
+    n_days, n_paths = portfolio_prices.shape
+    s0 = float(portfolio_prices[0, 0])
+    returns = (portfolio_prices / s0 - 1.0) * 100.0
 
-    VaR_lower = np.percentile(portfolio_prices, 5, axis=1)
-    VaR_upper = np.percentile(portfolio_prices, 95, axis=1)
+    quantiles = np.percentile(returns, QUANTILE_LEVELS, axis=1)
+    mean = returns.mean(axis=1)
+    p_loss = (returns < 0).mean(axis=1) * 100.0
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.grid(True, linestyle="--", alpha=0.6)
+    hist_counts = np.zeros((n_days, HIST_BINS), dtype=int)
+    hist_lo = np.zeros(n_days)
+    hist_hi = np.zeros(n_days)
+    for d in range(n_days):
+        lo, hi = returns[d].min(), returns[d].max()
+        if hi - lo < 1e-9:
+            lo, hi = lo - 0.5, hi + 0.5
+        hist_counts[d], _ = np.histogram(returns[d], bins=HIST_BINS, range=(lo, hi))
+        hist_lo[d], hist_hi[d] = lo, hi
 
-    ax.plot(portfolio_prices, color="#4A90E2", alpha=0.03)
-    ax.plot(portfolio_prices.mean(axis=1), color="#2ECC71", lw=2,
-            label="Simulated Mean")
+    rng = np.random.default_rng(0)
+    pick = rng.choice(n_paths, size=min(SAMPLE_PATHS, n_paths), replace=False)
+    sample = returns[:, pick].T
 
-    ax.fill_between(
-        range(len(portfolio_prices)),
-        VaR_lower, VaR_upper,
-        color="#F5B041", alpha=0.35, label="5–95% VaR Range"
-    )
-    ax.plot(VaR_lower, linestyle="--", color="#B9770E")
-    ax.plot(VaR_upper, linestyle="--", color="#B9770E")
+    actual = None
+    if actual_prices is not None and len(actual_prices) > 0:
+        a = np.asarray(actual_prices, dtype=float)[:n_days]
+        actual = [None if np.isnan(v) else round(float(v), 3) for v in (a / a[0] - 1.0) * 100.0]
 
-    if actual_prices is not None:
-        ax.plot(actual_prices[:len(portfolio_prices)],
-                color="#E74C3C", lw=2, label="Actual Price")
+    dates = pd.bdate_range(start=start_date, periods=n_days).strftime("%Y-%m-%d").tolist()
 
-    ticker_weights = [f"{t} ({w*100:.0f}%)" for t, w in zip(tickers, weights)]
-    ax.set_title(f"inve-STEM · Portfolio Simulation ({', '.join(ticker_weights)})")
-    ax.set_xlabel("Trading Days")
-    ax.set_ylabel("Portfolio Price")
+    def r(x, nd=3):
+        return np.round(np.asarray(x, dtype=float), nd).tolist()
 
-    mc_proxy = Line2D([0], [0], color="#4A90E2", lw=2, alpha=0.3,
-                      label="Monte Carlo Paths")
-    handles, labels = ax.get_legend_handles_labels()
-    handles = [mc_proxy] + handles
-    labels = ["Monte Carlo Paths"] + labels
-    ax.legend(handles, labels, loc="upper left")
-
-    return fig
-
-
-def make_distribution_figure(portfolio_prices, actual_prices, tickers, weights):
-    """Same chart as plot_growth_distribution in simulation.py, returned as a figure."""
-    final_prices = portfolio_prices[-1]
-    final_returns = (final_prices / portfolio_prices[0, 0] - 1) * 100
-
-    if actual_prices is not None:
-        last_idx = min(len(actual_prices), len(portfolio_prices)) - 1
-        actual_return = (actual_prices[last_idx] / actual_prices[0] - 1) * 100
-    else:
-        actual_return = None
-
-    var95 = np.percentile(final_returns, 5)
-    cvar95 = final_returns[final_returns <= var95].mean()
-    chance_of_loss = float(np.mean(final_returns < 0) * 100)
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.hist(final_returns, bins=60, alpha=0.7, edgecolor="black",
-            color="#4A90E2")
-    ax.axvline(final_returns.mean(), color="#2ECC71", lw=2,
-               label=f"Mean: {final_returns.mean():.2f}%")
-    ax.axvline(var95, color="#8E44AD", lw=2, linestyle="--",
-               label=(f"VaR 95%: {var95:.2f}%, CVaR 95%: {cvar95:.2f}%\n"
-                      f"Chance of Net Loss: {chance_of_loss:.2f}%"))
-    if actual_return is not None:
-        ax.axvline(actual_return, color="#E74C3C", lw=2, linestyle="--",
-                   label=f"Actual return: {actual_return:.2f}%")
-
-    ticker_weights = [f"{t} ({w*100:.0f}%)" for t, w in zip(tickers, weights)]
-    ax.set_title(f"Portfolio % Growth Distribution ({', '.join(ticker_weights)})")
-    ax.set_xlabel("% Growth")
-    ax.set_ylabel("Frequency")
-    ax.legend()
-
-    metrics = {
-        "mean_return": float(final_returns.mean()),
-        "median_return": float(np.median(final_returns)),
-        "var95": float(var95),
-        "cvar95": float(cvar95),
-        "chance_of_loss": chance_of_loss,
-        "best_case": float(final_returns.max()),
-        "worst_case": float(final_returns.min()),
-        "actual_return": float(actual_return) if actual_return is not None else None,
+    return {
+        "s0": s0,
+        "n_days": n_days,
+        "n_paths": n_paths,
+        "dates": dates,
+        "levels": QUANTILE_LEVELS.tolist(),
+        "quantiles": r(quantiles),
+        "mean": r(mean),
+        "p_loss": r(p_loss, 2),
+        "hist": {"counts": hist_counts.tolist(), "lo": r(hist_lo), "hi": r(hist_hi)},
+        "sample": r(sample),
+        "actual": actual,
     }
-    return fig, metrics
 
-
-# ----------------------------------------------------------------------
-# Routes
-# ----------------------------------------------------------------------
 
 @app.route("/")
 def index():
     return render_template("index.html", today=date.today().isoformat())
+
+
+@app.route("/plotly.js")
+def plotly_js():
+    # Served from the installed plotly package, so the dashboard works without a CDN.
+    return Response(get_plotlyjs(), mimetype="application/javascript",
+                    headers={"Cache-Control": "public, max-age=86400"})
 
 
 @app.route("/simulate", methods=["POST"])
@@ -154,7 +107,6 @@ def simulate():
         if len(tickers) == 0:
             return jsonify({"error": "Add at least one ticker."}), 400
         if abs(weights.sum() - 1.0) > 1e-6:
-            # Normalise weights so they sum to 1
             weights = weights / weights.sum()
 
         start_date = data["start_date"]
@@ -171,10 +123,8 @@ def simulate():
 
         db_file = "stocks.db"
 
-        # 1) Download price history into the local SQLite DB
         sim.download_and_store(tickers, db_file, end_date)
 
-        # 2) Run the simulation
         portfolio_sim = sim.PortfolioSimulator(
             tickers=tickers,
             weights=weights,
@@ -189,24 +139,10 @@ def simulate():
         )
         portfolio_prices, actual_prices = portfolio_sim.simulate()
 
-        # 3) Build the two charts and return them as base64 images
-        fig1 = make_portfolio_figure(portfolio_prices, actual_prices, tickers, weights)
-        paths_img = fig_to_base64(fig1)
-
-        fig2, metrics = make_distribution_figure(
-            portfolio_prices, actual_prices, tickers, weights
-        )
-        dist_img = fig_to_base64(fig2)
-
-        return jsonify({
-            "paths_img": paths_img,
-            "dist_img": dist_img,
-            "metrics": metrics,
-            "n_paths": int(portfolio_prices.shape[1]),
-            "n_days": int(portfolio_prices.shape[0]),
-            "tickers": tickers,
-            "weights": [float(w) for w in weights],
-        })
+        result = summarise(portfolio_prices, actual_prices, start_date)
+        result["tickers"] = tickers
+        result["weights"] = [float(w) for w in weights]
+        return jsonify(result)
 
     except Exception as e:
         traceback.print_exc()

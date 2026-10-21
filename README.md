@@ -33,7 +33,7 @@ The project ships in two forms:
 - **Monte Carlo Simulation**: Generate thousands of stochastic portfolio paths.
 - **Risk Metrics**: Compute 5–95% VaR bands, Conditional VaR (CVaR), chance of net loss, and growth distributions.
 - **Visualization**: Plot portfolio paths, mean trajectory, VaR bands, and terminal return distributions.
-- **Web Frontend**: Browser-based UI to configure and run simulations without editing code.
+- **Interactive Dashboard**: Browser-based UI with zoomable charts and live sliders for the horizon and confidence level.
 
 ---
 
@@ -42,7 +42,7 @@ The project ships in two forms:
 ```
 Quant-MC-InveSTEM--main/
 ├── simulation.py       # Core simulation engine
-├── app.py              # Flask server — imports simulation.py and serves the web UI
+├── app.py              # Flask server — imports simulation.py and serves the dashboard
 ├── requirements.txt    # Python dependencies
 ├── Dockerfile          # Container image for the web frontend
 ├── docker-compose.yml  # One-command start: docker compose up
@@ -50,7 +50,7 @@ Quant-MC-InveSTEM--main/
 │   └── index.html      # Web UI markup
 └── static/
     ├── style.css       # Web UI styling
-    └── app.js          # Web UI client logic
+    └── app.js          # Interactive charts and sliders
 ```
 
 ---
@@ -69,10 +69,10 @@ Or, if you only want to run the standalone script:
 pip3 install numpy pandas matplotlib yfinance scipy arch numba
 ```
 
-If you also want the web frontend, add Flask:
+If you also want the web dashboard, add Flask and Plotly:
 
 ```bash
-pip3 install flask
+pip3 install flask plotly
 ```
 
 ---
@@ -130,7 +130,11 @@ Then open **http://127.0.0.1:5000** in your browser.
 2. **Set the start and end dates** for the simulation window.
 3. **Choose how many Monte Carlo paths** to run. More paths = smoother distribution, slower run.
 4. **Optionally open Advanced parameters** to adjust `df_tails`, `vol_window`, return type, and max daily return.
-5. Click **Execute Simulation**. The results — metric strip (Mean, VaR 95%, CVaR 95%, P(loss), best/worst, actual return) and the two charts — appear in the right panel.
+5. Click **Execute Simulation**. The metric strip and three interactive charts appear in the right panel:
+   - **Fig A** — sample paths, percentile bands, the median and mean, and the real portfolio.
+   - **Fig B** — the return distribution on the chosen day, with VaR, the mean and the actual return marked.
+   - **Fig C** — how VaR, CVaR and the chance of a loss develop over the horizon.
+6. Drag the **Horizon** slider (or click on Fig A) to see the risk on any day, and the **Confidence** slider to change the VaR level. These update instantly, without running the simulation again. Charts can be zoomed, hovered and saved as PNG from their toolbar.
 
 ### How it works
 
